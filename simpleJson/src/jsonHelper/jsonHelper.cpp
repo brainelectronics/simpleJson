@@ -2,12 +2,11 @@
 //  jsonHelper.cpp
 //  simpleJson
 //
-//  Created by Jonas Scharpf on 19.05.20.
-//  Copyright (c) 2020 Jonas Scharpf. All rights reserved.
+//  Created by brainelectronics on 19.05.20.
+//  Copyright (c) 2020 brainelectronics. All rights reserved.
 //
 
 #include "jsonHelper.h"
-
 
 // Utility function to create a node in memory
 struct Node* getNode()
@@ -26,16 +25,17 @@ void insertToPointer(struct Node* aNode, int key, void* ptr)
     }
 }
 
-// check whether the linked list is empty
+// check whether the given linked list is empty
 bool isEmpty(struct Node** head_ref)
 {
     return *head_ref == NULL;
 }
 
-// get length of this linked list
+// get length of given linked list
 int getLength(struct Node** head_ref)
 {
     int length = 0;
+    
     struct Node* current;
     
     // iterate over all nodes until the node is NULL
@@ -47,14 +47,14 @@ int getLength(struct Node** head_ref)
     return length;
 }
 
-// display the list as JSON
+// display the list in JSON format
 void printJson(struct Node** head_ref, bool pretty, int indentationNumber)
 {
     struct Node* ptr = *head_ref;
     
 #ifdef DEBUG_PRINT
     // get total length
-    // printf("Total length of this list: %d\n", getLength(head_ref));
+    printf("Total length of this list: %d\n", getLength(head_ref));
 #endif
     
     // if the list is empty or only 1 element (head itself) is the list
@@ -65,7 +65,7 @@ void printJson(struct Node** head_ref, bool pretty, int indentationNumber)
     }
     
     if (pretty) {
-        // print pretty indentation
+        // print pretty indentation with new line after open bracket
         printf("{\n");
     }
     else {
@@ -83,6 +83,7 @@ void printJson(struct Node** head_ref, bool pretty, int indentationNumber)
     if (pretty) {
         // print pretty indentation
         printf("\n");
+        
         // print n-1 indentation as closing bracket has same indentation as key
         for (int i = 0; i < indentationNumber-1; i++) {
             printf("  ");
@@ -110,7 +111,7 @@ void printJsonChildContent(struct Node* pNode, bool pretty, int indentationNumbe
                 printf("\"%s\":", pNode->keyStr);
             }
             
-            // print actual content
+            // print actual content of this Node
             printNodeContent(pNode, pretty, indentationNumber);
             
             if (pNode->next != NULL) {
@@ -125,7 +126,9 @@ void printJsonChildContent(struct Node* pNode, bool pretty, int indentationNumbe
         }
         else {
             // NULL pointer
-            // printf("NULL pointer");
+#ifdef DEBUG_PRINT
+            printf("NULL pointer");
+#endif
         }
     }
 }
@@ -164,17 +167,21 @@ void appendNode(struct Node** head_ref, struct Node* new_node)
 struct Node* arrayToList(int* pArr, int numberOfElements)
 {
     struct Node* root = getNode();
+    
     root->key = 0;
     root->type = aInt;
     root->ptr = pArr;
     
     for (int i = 1; i < numberOfElements; i++) {
-        struct Node* asdfNode = getNode();
-        asdfNode->key = i;
-        asdfNode->type = aInt;
-        asdfNode->ptr = (pArr + i);
+        // create Node for this element
+        struct Node* thisNode = getNode();
         
-        appendNode(&root, asdfNode);
+        thisNode->key = i;
+        thisNode->type = aInt;
+        thisNode->ptr = (pArr + i);
+        
+        // append this Node to the root
+        appendNode(&root, thisNode);
     }
     
     return root;
@@ -190,6 +197,7 @@ struct Node* searchForKey(struct Node** head_ref, int key, bool deepSearch)
 // search for a Node matching the key string (first match is returned)
 struct Node* searchForKeyString(struct Node** head_ref, const char* keyStr, bool deepSearch)
 {
+    // search for a Node by keyStr only
     return searchForNode(head_ref, 0, keyStr, deepSearch);
 }
 
@@ -217,9 +225,11 @@ struct Node* searchForNode(struct Node** head_ref, int key, const char* keyStr, 
             if (current->key == key) {
                 // return the current node if key integers match
                 tmp = current;
+                
 #ifdef DEBUG_PRINT
                 printf("Match by key\n");
 #endif
+                
                 break;
             }
         }
@@ -229,9 +239,11 @@ struct Node* searchForNode(struct Node** head_ref, int key, const char* keyStr, 
             if(strcmp(current->keyStr, keyStr) == 0) {
                 // return the current node if key strings match
                 tmp = current;
+                
 #ifdef DEBUG_PRINT
                 printf("\nMatch by key string\n");
 #endif
+                
                 break;
             }
         }
@@ -252,9 +264,11 @@ struct Node* searchForNode(struct Node** head_ref, int key, const char* keyStr, 
             
             if (tmp != NULL) {
                 // some match was found
+                
 #ifdef DEBUG_PRINT
                 printf(" with successful match");
 #endif
+                
                 break;
             }
         }
@@ -276,151 +290,101 @@ struct Node* searchForNode(struct Node** head_ref, int key, const char* keyStr, 
     return tmp;
 }
 
-// create a Node marked as integer
-//struct Node* createIntegerNode(const char* keyStr, void* pVal)
-struct Node* createIntegerNode(const char* keyStr, void* pVal, dataType type)
+// create a Node marked as the dataType
+struct Node* createGeneralNode(const char* keyStr, void* pVal, dataType type)
 {
     // get a new Node
-    struct Node* intNode = getNode();
+    struct Node* generalNode = getNode();
     
-    // intNode->key = 1234;
-    strcpy(intNode->keyStr, keyStr);
-    //    intNode->type = aInt;
-    intNode->type = type;
-    intNode->ptr = pVal;
+    // generalNode->key = 1234;
+    strcpy(generalNode->keyStr, keyStr);
+    generalNode->type = type;
+    generalNode->ptr = pVal;
     
-    return intNode;
+    return generalNode;
+}
+
+// add new Node or update existing Node in given linked list
+void addGeneralNode(struct Node** head_ref, const char* keyStr, void* pVal, dataType type)
+{
+    struct Node* pIntNode = NULL;
+    
+    // find already existing Node with this keyStr in head_ref
+    // but do not enter nested Nodes
+    pIntNode = searchForKeyString(head_ref, keyStr, false);
+    
+    if (pIntNode != NULL) {
+        // update this Node's value
+#ifdef DEBUG_PRINT
+        printNodeUpdateInfo(pIntNode, keyStr, pVal, aInt, true);
+#endif
+        pIntNode->type = type;
+        pIntNode->ptr = pVal;
+    }
+    else {
+        // create new Node and append it
+        pIntNode = createGeneralNode(keyStr, pVal, type);
+        
+        appendNode(head_ref, pIntNode);
+        
+#ifdef DEBUG_PRINT
+        printNodeUpdateInfo(pIntNode, keyStr, pVal, aInt, false);
+#endif
+    }
 }
 
 // add new Node or update existing Node in given linked list
 void addIntegerNode(struct Node** head_ref, const char* keyStr, void* pVal)
 {
-    struct Node* pIntNode = NULL;
-    
-    // find already existing Node with this keyStr in head_ref
-    // but do not enter nested Nodes
-    pIntNode = searchForKeyString(head_ref, keyStr, false);
-    
-    if (pIntNode != NULL) {
-        // update this Node's value
-#ifdef DEBUG_PRINT
-        printNodeUpdateInfo(pIntNode, keyStr, pVal, aInt, true);
-#endif
-        pIntNode->type = aInt;
-        pIntNode->ptr = pVal;
-    }
-    else {
-        // create new Node and append it
-//        pIntNode = createIntegerNode(keyStr, pVal);
-        pIntNode = createIntegerNode(keyStr, pVal, aInt);
-        
-        appendNode(head_ref, pIntNode);
-        
-#ifdef DEBUG_PRINT
-        printNodeUpdateInfo(pIntNode, keyStr, pVal, aInt, false);
-#endif
-    }
+    addGeneralNode(head_ref, keyStr, pVal, aInt);
 }
 
 // add new Node or update existing Node in given linked list
 void addU8IntegerNode(struct Node** head_ref, const char* keyStr, void* pVal)
 {
-    struct Node* pIntNode = NULL;
-    
-    // find already existing Node with this keyStr in head_ref
-    // but do not enter nested Nodes
-    pIntNode = searchForKeyString(head_ref, keyStr, false);
-    
-    if (pIntNode != NULL) {
-        // update this Node's value
-#ifdef DEBUG_PRINT
-        printNodeUpdateInfo(pIntNode, keyStr, pVal, aInt, true);
-#endif
-        pIntNode->type = TYPE_UINT8;
-        pIntNode->ptr = pVal;
-    }
-    else {
-        // create new Node and append it
-        // pIntNode = createIntegerNode(keyStr, pVal);
-        pIntNode = createIntegerNode(keyStr, pVal, TYPE_UINT8);
-        appendNode(head_ref, pIntNode);
-        
-#ifdef DEBUG_PRINT
-        printNodeUpdateInfo(pIntNode, keyStr, pVal, aInt, false);
-#endif
-    }
+    addGeneralNode(head_ref, keyStr, pVal, TYPE_UINT8);
 }
 
 // add new Node or update existing Node in given linked list
 void addS8IntegerNode(struct Node** head_ref, const char* keyStr, void* pVal)
 {
-    struct Node* pIntNode = NULL;
-    
-    // find already existing Node with this keyStr in head_ref
-    // but do not enter nested Nodes
-    pIntNode = searchForKeyString(head_ref, keyStr, false);
-    
-    if (pIntNode != NULL) {
-        // update this Node's value
-#ifdef DEBUG_PRINT
-        printNodeUpdateInfo(pIntNode, keyStr, pVal, aInt, true);
-#endif
-        pIntNode->type = TYPE_INT8;
-        pIntNode->ptr = pVal;
-    }
-    else {
-        // create new Node and append it
-        // pIntNode = createIntegerNode(keyStr, pVal);
-        pIntNode = createIntegerNode(keyStr, pVal, TYPE_INT8);
-        appendNode(head_ref, pIntNode);
-        
-#ifdef DEBUG_PRINT
-        printNodeUpdateInfo(pIntNode, keyStr, pVal, aInt, false);
-#endif
-    }
+    addGeneralNode(head_ref, keyStr, pVal, TYPE_INT8);
 }
 
-// create a Node marked as string
-struct Node* createStringNode(const char* keyStr, void* pVal)
+// add new Node or update existing Node in given linked list
+void addU16IntegerNode(struct Node** head_ref, const char* keyStr, void* pVal)
 {
-    // get a new Node
-    struct Node* stringNode = getNode();
-    
-    // stringNode->key = 1234;
-    strcpy(stringNode->keyStr, keyStr);
-    stringNode->type = aString;
-    stringNode->ptr = pVal;
-    
-    return stringNode;
+    addGeneralNode(head_ref, keyStr, pVal, TYPE_UINT16);
+}
+
+// add new Node or update existing Node in given linked list
+void addS16IntegerNode(struct Node** head_ref, const char* keyStr, void* pVal)
+{
+    addGeneralNode(head_ref, keyStr, pVal, TYPE_INT16);
+}
+
+// add new Node or update existing Node in given linked list
+void addU32IntegerNode(struct Node** head_ref, const char* keyStr, void* pVal)
+{
+    addGeneralNode(head_ref, keyStr, pVal, TYPE_UINT32);
+}
+
+// add new Node or update existing Node in given linked list
+void addS32IntegerNode(struct Node** head_ref, const char* keyStr, void* pVal)
+{
+    addGeneralNode(head_ref, keyStr, pVal, TYPE_INT32);
+}
+
+// add new Node or update existing Node in given linked list
+void addFloatIntegerNode(struct Node** head_ref, const char* keyStr, void* pVal)
+{
+    addGeneralNode(head_ref, keyStr, pVal, TYPE_FLOAT);
 }
 
 // add new Node or update existing Node in given linked list
 void addStringNode(struct Node** head_ref, const char* keyStr, void* pVal)
 {
-    struct Node* pStrNode = NULL;
-    
-    // find already existing Node with this keyStr in head_ref
-    // but do not enter nested Nodes
-    pStrNode = searchForKeyString(head_ref, keyStr, false);
-    
-    if (pStrNode != NULL) {
-        // update this Node's value
-#ifdef DEBUG_PRINT
-        printNodeUpdateInfo(pStrNode, keyStr, pVal, aString, true);
-#endif
-        // update type of Node as well as the pointer's content
-        pStrNode->type = aString;
-        pStrNode->ptr = pVal;
-    }
-    else {
-        // create new Node and append it
-        pStrNode = createStringNode(keyStr, pVal);
-        appendNode(head_ref, pStrNode);
-        
-#ifdef DEBUG_PRINT
-        printNodeUpdateInfo(pStrNode, keyStr, pVal, aString, false);
-#endif
-    }
+    addGeneralNode(head_ref, keyStr, pVal, aString);
 }
 
 // create a Node marked as array (only integer arrays are possible right now)
@@ -451,6 +415,7 @@ void addArrayNode(struct Node** head_ref, const char* keyStr, void* pVal, int nu
 #ifdef DEBUG_PRINT
         printNodeUpdateInfo(pArrayNode, keyStr, arrayToList((int*)pVal, numberOfElements), aArray, true);
 #endif
+        
         // update type of Node as well as the pointer's content
         pArrayNode->type = aArray;
         pArrayNode->ptr = arrayToList((int*)pVal, numberOfElements);
@@ -610,10 +575,6 @@ void printNodeUpdateInfo(struct Node* pNode, const char* keyStr, void* pVal, enu
     tmp->ptr = pVal;
     tmp->type =thisType;
     
-    //    printf("START 2\n");
-    //    printf("val: %d\n", *(int*)tmp->ptr);
-    //    printf("type: %d\n", tmp->type);
-    //    printf("END 2\n");
     printNodeContent(tmp);
     
     free(tmp);
@@ -696,67 +657,40 @@ void printNodeContent(struct Node* pNode, bool pretty, int indentationNumber)
             printf("%d", *(int8_t*)pNode->ptr);
             break;
         }
+        case TYPE_UINT16:
+        {
+            // typecast void pointer back to integer
+            printf("%d", *(uint16_t*)pNode->ptr);
+            break;
+        }
+        case TYPE_INT16:
+        {
+            // typecast void pointer back to integer
+            printf("%d", *(int16_t*)pNode->ptr);
+            break;
+        }
+        case TYPE_UINT32:
+        {
+            // typecast void pointer back to integer
+            printf("%d", *(uint32_t*)pNode->ptr);
+            break;
+        }
+        case TYPE_INT32:
+        {
+            // typecast void pointer back to integer
+            printf("%d", *(int32_t*)pNode->ptr);
+            break;
+        }
+        case TYPE_FLOAT:
+        {
+            // typecast void pointer back to float
+            printf("%1.5f", *(float*)pNode->ptr);
+            break;
+        }
         default:
         {
             printf("No matching case");
             break;
         }
     }
-}
-
-
-void createSomeJson(struct Node **head_ref)
-{
-    // add an integer Node to the linked list
-    int abc = 123;
-    addIntegerNode(head_ref, "intNode", &abc);
-    
-    
-    
-    // add a string Node to the linked list
-    char* pSomeString = (char *) calloc(255, sizeof(char));
-    sprintf(pSomeString, "asdf bla bla %d", 1234);
-    addStringNode(head_ref, "strNode", pSomeString);
-    
-    
-    
-    // add array Node to the linked list
-    int arr2[] = { 11, 22, 33, 44, 55, 66, 77 };
-    int numOfElements = sizeof(arr2) / sizeof(arr2[0]);
-    addArrayNode(head_ref, "arrayNode", arr2, numOfElements);
-    
-    
-    
-    // add a nested Node list to the linked list
-    struct Node* nestedHead = addNestedNode(head_ref, "nodeNode");
-    
-    // append a nested integer Node to the first sub Node (optional)
-    int bcd = 234;
-    addIntegerNode(&nestedHead, "intNestedNode", &bcd);
-    
-    // append a nested string Node to the first sub Node (optional)
-    char* pNestedString = (char *) calloc(255, sizeof(char));
-    sprintf(pNestedString, "Hello World! @ %d", 9876);
-    addStringNode(&nestedHead, "strNestedNode", pNestedString);
-    
-    // append a nested array Node to the first sub Node (optional)
-    int nestedArray[] = { 123, 456, 789 };
-    int nestedArrayElements = sizeof(nestedArray) / sizeof(nestedArray[0]);
-    addArrayNode(&nestedHead, "arrayNestedNode", nestedArray, nestedArrayElements);
-    
-    // append a nested nested Node to the first sub Node (optional)
-    struct Node* nestedNestedHead = addNestedNode(&nestedHead, "nodeNestedNode");
-    // append a nested integer Node to the first sub Node (optional)
-    int cde = 345;
-    addIntegerNode(&nestedNestedHead, "intNestedNestedNode", &cde);
-    
-    // append a nested integer Node to the first sub sub Node (optional)
-    int bcde = 2345;
-    addIntegerNode(&nestedHead, "intNestedNode2", &bcde);
-    
-    
-    
-    // add an integer Node to the linked list
-    int abcd = 1234;
-    addIntegerNode(head_ref, "intNode2", &abcd);
 }
