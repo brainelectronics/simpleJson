@@ -1,12 +1,12 @@
 //
 //  main.h
-//  HelloWorldC++
+//  simpleJson
 //
-//  Created by Jonas Scharpf on 30.04.20.
-//  Copyright (c) 2020 Jonas Scharpf. All rights reserved.
+//  Created by brainelectronics on 30.04.20.
+//  Copyright (c) 2020 brainelectronics. All rights reserved.
 //
 
-#ifndef HelloWorldC___main_h
-#define HelloWorldC___main_h
+#ifndef simpleJson___main_h
+#define simpleJson___main_h
 
 #endif
