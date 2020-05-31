@@ -45,7 +45,7 @@ int main(int argc, const char * argv[])
 
     // add a float Node to the linked list
     float abcF = 1.23456;
-    addFloatIntegerNode(&head, "floatNode", &abcF);
+    addFloatNode(&head, "floatNode", &abcF);
 
 
 

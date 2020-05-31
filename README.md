@@ -90,7 +90,20 @@ printJson(&head, true);
 
 #### Floats
 ```C
-void addFloatIntegerNode(struct Node** head_ref, const char* keyStr, void* pVal);
+void addFloatNode(struct Node** head_ref, const char* keyStr, void* pVal);
+```
+
+Example:
+```C
+struct Node* head = getNode();
+
+// add a float Node to the linked list
+float abcF = 1.23456890;
+addFloatNode(&head, "floatNode", &abcF);
+
+// floats will be printed with a precision of 5 decimals
+// print the JSON with pretty indentation
+printJson(&head, true);
 ```
 
 ```JSON
@@ -99,7 +112,7 @@ void addFloatIntegerNode(struct Node** head_ref, const char* keyStr, void* pVal)
 }
 ```
 
-#### String
+#### Strings
 ```C
 void addStringNode(struct Node** head_ref, const char* keyStr, void* pVal);
 ```
@@ -120,6 +133,29 @@ printJson(&head, true);
 ```JSON
 {
   "keyOfThisNode": "asdf bla bla 1234",
+}
+```
+
+#### Bools
+```C
+void addBoolNode(struct Node** head_ref, const char* keyStr, void* pVal);
+```
+
+Example:
+```C
+struct Node* head = getNode();
+
+// add a boolean Node to the linked list
+bool abcB = false;
+addBoolNode(&head, "exampleOfBool", &abcB);
+
+// print the JSON with pretty indentation
+printJson(&head, true);
+```
+
+```JSON
+{
+  "exampleOfBool": false,
 }
 ```
 
@@ -176,8 +212,8 @@ addStringNode(&nestedHead, "strNestedNode", pNestedString);
 // append a nested nested Node to the first sub Node (optional)
 struct Node* nestedNestedHead = addNestedNode(&nestedHead, "nodeNestedNode");
 // append a nested integer Node to the first sub Node (optional)
-int cde = 345;
-addIntegerNode(&nestedNestedHead, "intNestedNestedNode", &cde);
+float cde = 3.141592;
+addFloatNode(&nestedNestedHead, "floatNestedNestedNode", &cde);
 
 // print the JSON with pretty indentation
 printJson(&head, true);
@@ -189,7 +225,7 @@ printJson(&head, true);
     "intNestedNode": 234,
     "strNestedNode": "Hello World! @ 9876",
     "nodeNestedNode": {
-      "intNestedNestedNode": 345
+      "floatNestedNestedNode": 3.15159
     }
   }
 }

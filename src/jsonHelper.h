@@ -46,6 +46,8 @@ enum dataType
     TYPE_NODE,          //< void pointer contains a linked list
     TYPE_ARRAY,         //< void pointer contains an array of integers
     TYPE_CHAR,          //< void pointer contains a char array/string
+    TYPE_BOOL,          //< void pointer contains a bool
+
     TYPE_DATACONTAINER  //< void pointer contains a Datacontainer
 };
 
@@ -104,8 +106,9 @@ void addS16IntegerNode(struct Node** head_ref, const char* keyStr, void* pVal);
 void addU32IntegerNode(struct Node** head_ref, const char* keyStr, void* pVal);
 void addS32IntegerNode(struct Node** head_ref, const char* keyStr, void* pVal);
 void addIntegerNode(struct Node** head_ref, const char* keyStr, void* pVal);
-void addFloatIntegerNode(struct Node** head_ref, const char* keyStr, void* pVal);
+void addFloatNode(struct Node** head_ref, const char* keyStr, void* pVal);
 void addStringNode(struct Node** head_ref, const char* keyStr, void* pVal);
+void addBoolNode(struct Node** head_ref, const char* keyStr, void* pVal);
 
 struct Node* createArrayNode(const char* keyStr, int* pVal, int numberOfElements);
 void addArrayNode(struct Node** head_ref, const char* keyStr, void* pVal, int numberOfElements);

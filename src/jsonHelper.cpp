@@ -35,15 +35,15 @@ bool isEmpty(struct Node** head_ref)
 int getLength(struct Node** head_ref)
 {
     int length = 0;
-    
+
     struct Node* current;
-    
+
     // iterate over all nodes until the node is NULL
     for (current = *head_ref; current != NULL; current = current->next)
     {
         length++;
     }
-    
+
     return length;
 }
 
@@ -51,19 +51,19 @@ int getLength(struct Node** head_ref)
 void printJson(struct Node** head_ref, bool pretty, int indentationNumber)
 {
     struct Node* ptr = *head_ref;
-    
+
 #ifdef DEBUG_PRINT
     // get total length
     printf("Total length of this list: %d\n", getLength(head_ref));
 #endif
-    
+
     // if the list is empty or only 1 element (head itself) is the list
     // then it's an empty JSON
     if ((getLength(head_ref) <= 1) && (ptr != NULL) && (ptr->ptr == NULL)) {
         printf("{}");
         return;
     }
-    
+
     if (pretty) {
         // print pretty indentation with new line after open bracket
         printf("{\n");
@@ -71,19 +71,19 @@ void printJson(struct Node** head_ref, bool pretty, int indentationNumber)
     else {
         printf("{");
     }
-    
+
     // start from the beginning until the next is NULL
     while(ptr != NULL) {
         printJsonChildContent(ptr, pretty, indentationNumber);
-        
+
         // change to next Node
         ptr = ptr->next;
     }
-    
+
     if (pretty) {
         // print pretty indentation
         printf("\n");
-        
+
         // print n-1 indentation as closing bracket has same indentation as key
         for (int i = 0; i < indentationNumber-1; i++) {
             printf("  ");
@@ -110,10 +110,10 @@ void printJsonChildContent(struct Node* pNode, bool pretty, int indentationNumbe
             else {
                 printf("\"%s\":", pNode->keyStr);
             }
-            
+
             // print actual content of this Node
             printNodeContent(pNode, pretty, indentationNumber);
-            
+
             if (pNode->next != NULL) {
                 if (pretty) {
                     // print pretty indentation
@@ -138,28 +138,28 @@ void printJsonChildContent(struct Node* pNode, bool pretty, int indentationNumbe
 void appendNode(struct Node** head_ref, struct Node* new_node)
 {
     struct Node* last = *head_ref;
-    
+
     // 1. new_node is going to be the last node, so make next of it as NULL
     new_node->next = NULL;
-    
+
     // 2. if the linked list is empty, then make new_node as head
     if (*head_ref == NULL) {
         new_node->prev = NULL;
         *head_ref = new_node;
         return;
     }
-    
+
     // else traverse till the last node
     while (last->next != NULL) {
         last = last->next;
     }
-    
+
     // change the next of last node to new_node
     last->next = new_node;
-    
+
     // 4. make last node as previous of new_node
     new_node->prev = last;
-    
+
     return;
 }
 
@@ -167,23 +167,23 @@ void appendNode(struct Node** head_ref, struct Node* new_node)
 struct Node* arrayToList(int* pArr, int numberOfElements)
 {
     struct Node* root = getNode();
-    
+
     root->key = 0;
     root->type = aInt;
     root->ptr = pArr;
-    
+
     for (int i = 1; i < numberOfElements; i++) {
         // create Node for this element
         struct Node* thisNode = getNode();
-        
+
         thisNode->key = i;
         thisNode->type = aInt;
         thisNode->ptr = (pArr + i);
-        
+
         // append this Node to the root
         appendNode(&root, thisNode);
     }
-    
+
     return root;
 }
 
@@ -207,85 +207,85 @@ struct Node* searchForNode(struct Node** head_ref, int key, const char* keyStr, 
     // start from the first node
     struct Node* current = *head_ref;
     struct Node* tmp = NULL;
-    
+
     // if list is empty
     if (current == NULL) {
         return NULL;
     }
-    
+
     // start from the beginning until the next is NULL
     while (current != NULL) {
 #ifdef DEBUG_PRINT
         printf("\n\n");
         printJson(&current);
 #endif
-        
+
         // only search by key if it is set
         if (key != 0) {
             if (current->key == key) {
                 // return the current node if key integers match
                 tmp = current;
-                
+
 #ifdef DEBUG_PRINT
                 printf("Match by key\n");
 #endif
-                
+
                 break;
             }
         }
-        
+
         // only if a keyStr is given other than default value ""
         if ((keyStr != NULL) && (keyStr[0] != '\0') && (current->keyStr != NULL)) {
             if(strcmp(current->keyStr, keyStr) == 0) {
                 // return the current node if key strings match
                 tmp = current;
-                
+
 #ifdef DEBUG_PRINT
                 printf("\nMatch by key string\n");
 #endif
-                
+
                 break;
             }
         }
-        
+
         // if this node contains Node(s) do a deep search
         if ((current->type == aNode) && (deepSearch == true)) {
 #ifdef DEBUG_PRINT
             printf("\nEntering nested list");
 #endif
-            
+
             // typecast void pointer back to Node
             tmp = (Node*)current->ptr;
             tmp = searchForNode(&tmp, key, keyStr);
-            
+
 #ifdef DEBUG_PRINT
             printf("\n\tLeft nested list");
 #endif
-            
+
             if (tmp != NULL) {
                 // some match was found
-                
+
 #ifdef DEBUG_PRINT
                 printf(" with successful match");
 #endif
-                
+
                 break;
             }
         }
-        
+
         // move to next
         if (current != NULL) {
             current = current->next;
         }
     }
-    
+
 #ifdef DEBUG_PRINT
     printf("\n\nFound this Node by key \"%d\" or keyStr \"%s\"\n", key, keyStr);
     printf("BEGIN OF CONTENT\n");
     printJson(&tmp, PRETTY);
     printf("\nEND OF CONTENT\n");
 #endif
-    
+
     // if no matching data found, return the current NULL node
     return tmp;
 }
@@ -295,12 +295,12 @@ struct Node* createGeneralNode(const char* keyStr, void* pVal, dataType type)
 {
     // get a new Node
     struct Node* generalNode = getNode();
-    
+
     // generalNode->key = 1234;
     strcpy(generalNode->keyStr, keyStr);
     generalNode->type = type;
     generalNode->ptr = pVal;
-    
+
     return generalNode;
 }
 
@@ -308,11 +308,11 @@ struct Node* createGeneralNode(const char* keyStr, void* pVal, dataType type)
 void addGeneralNode(struct Node** head_ref, const char* keyStr, void* pVal, dataType type)
 {
     struct Node* pIntNode = NULL;
-    
+
     // find already existing Node with this keyStr in head_ref
     // but do not enter nested Nodes
     pIntNode = searchForKeyString(head_ref, keyStr, false);
-    
+
     if (pIntNode != NULL) {
         // update this Node's value
 #ifdef DEBUG_PRINT
@@ -324,9 +324,9 @@ void addGeneralNode(struct Node** head_ref, const char* keyStr, void* pVal, data
     else {
         // create new Node and append it
         pIntNode = createGeneralNode(keyStr, pVal, type);
-        
+
         appendNode(head_ref, pIntNode);
-        
+
 #ifdef DEBUG_PRINT
         printNodeUpdateInfo(pIntNode, keyStr, pVal, aInt, false);
 #endif
@@ -376,7 +376,7 @@ void addS32IntegerNode(struct Node** head_ref, const char* keyStr, void* pVal)
 }
 
 // add new Node or update existing Node in given linked list
-void addFloatIntegerNode(struct Node** head_ref, const char* keyStr, void* pVal)
+void addFloatNode(struct Node** head_ref, const char* keyStr, void* pVal)
 {
     addGeneralNode(head_ref, keyStr, pVal, TYPE_FLOAT);
 }
@@ -387,17 +387,23 @@ void addStringNode(struct Node** head_ref, const char* keyStr, void* pVal)
     addGeneralNode(head_ref, keyStr, pVal, aString);
 }
 
+// add new Node or update existing Node in given linked list
+void addBoolNode(struct Node** head_ref, const char* keyStr, void* pVal)
+{
+    addGeneralNode(head_ref, keyStr, pVal, TYPE_BOOL);
+}
+
 // create a Node marked as array (only integer arrays are possible right now)
 struct Node* createArrayNode(const char* keyStr, int* pVal, int numberOfElements)
 {
     // get a new Node
     struct Node* arrayNode = getNode();
-    
+
     // arrayNode->key = 1234;
     strcpy(arrayNode->keyStr, keyStr);
     arrayNode->type = aArray;
     arrayNode->ptr = arrayToList(pVal, numberOfElements);
-    
+
     return arrayNode;
 }
 
@@ -405,17 +411,17 @@ struct Node* createArrayNode(const char* keyStr, int* pVal, int numberOfElements
 void addArrayNode(struct Node** head_ref, const char* keyStr, void* pVal, int numberOfElements)
 {
     struct Node* pArrayNode = NULL;
-    
+
     // find already existing Node with this keyStr in head_ref
     // but do not enter nested Nodes
     pArrayNode = searchForKeyString(head_ref, keyStr, false);
-    
+
     if (pArrayNode != NULL) {
         // update this Node's value
 #ifdef DEBUG_PRINT
         printNodeUpdateInfo(pArrayNode, keyStr, arrayToList((int*)pVal, numberOfElements), aArray, true);
 #endif
-        
+
         // update type of Node as well as the pointer's content
         pArrayNode->type = aArray;
         pArrayNode->ptr = arrayToList((int*)pVal, numberOfElements);
@@ -424,7 +430,7 @@ void addArrayNode(struct Node** head_ref, const char* keyStr, void* pVal, int nu
         // create new Node and append it
         pArrayNode = createArrayNode(keyStr, (int*)pVal, numberOfElements);
         appendNode(head_ref, pArrayNode);
-        
+
 #ifdef DEBUG_PRINT
         printNodeUpdateInfo(pArrayNode, keyStr, arrayToList((int*)pVal, numberOfElements), aArray, false);
 #endif
@@ -436,15 +442,15 @@ struct Node* createNestedNode(const char* keyStr)
 {
     // get a new Node (for the linked list)
     struct Node* nestedNode = getNode();
-    
+
     // get a new Node (containing the nested stuff)
     struct Node* nestedNodeContent = getNode();
-    
+
     // nestedNode->key = 1234;
     strcpy(nestedNode->keyStr, keyStr);
     nestedNode->type = aNode;
     nestedNode->ptr = nestedNodeContent;
-    
+
     return nestedNode;
 }
 
@@ -452,10 +458,10 @@ struct Node* createNestedNode(const char* keyStr)
 struct Node* addNestedNode(struct Node** head_ref, const char* keyStr)
 {
     struct Node* pNodeNode = NULL;
-    
+
     pNodeNode = createNestedNode(keyStr);
     appendNode(head_ref, pNodeNode);
-    
+
     // return head of nested Node
     return (Node*)pNodeNode->ptr;
 }
@@ -481,7 +487,7 @@ struct Node* getNestedNodeHead(struct Node** head_ref, const char* keyStr, bool 
     // but do not enter nested Nodes
     struct Node* nestedHead = NULL;
     nestedHead = searchForKeyString(head_ref, keyStr, false);
-    
+
     if (nestedHead != NULL) {
         // if some nested Node was found
         if (nestedHead->type == aNode) {
@@ -503,14 +509,14 @@ struct Node* getNestedNodeHead(struct Node** head_ref, const char* keyStr, bool 
         // no nested Node with this keyStr has been found
         nestedHead = NULL;
     }
-    
+
     if ((createOnError == true) && (nestedHead == NULL)) {
 #ifdef DEBUG_PRINT
         printf("Failed to find nested Node \"%s\", created new one\n", keyStr);
 #endif
         nestedHead = addNestedNode(head_ref, keyStr);
     }
-    
+
     // return content of nested head
     return nestedHead;
 }
@@ -529,19 +535,19 @@ struct Node* clearNestedNodeContent(struct Node** head_ref, const char* keyStr)
     // find already existing Node with this keyStr in head_ref
     // but do not enter nested Nodes
     struct Node* nestedHead = searchForKeyString(head_ref, keyStr, false);
-    
+
     if (nestedHead != NULL) {
         // if some nested Node was found
         if (nestedHead->type == aNode) {
             // if the found thing is a Node
-            
+
             // free old stuff of nested Node's content
             if (nestedHead->ptr != NULL) {
                 free(nestedHead->ptr);
-                
+
                 // clear content of nested head
                 nestedHead->ptr = getNode();
-                
+
                 nestedHead = (Node*)nestedHead->ptr;
             }
         }
@@ -554,7 +560,7 @@ struct Node* clearNestedNodeContent(struct Node** head_ref, const char* keyStr)
     {
         nestedHead = NULL;
     }
-    
+
     // return content of nested head
     return nestedHead;
 }
@@ -570,15 +576,15 @@ void printNodeUpdateInfo(struct Node* pNode, const char* keyStr, void* pVal, enu
     {
         printf("Creating new Node \"%s\" with value ", keyStr);
     }
-    
+
     struct Node* tmp = getNode();
     tmp->ptr = pVal;
     tmp->type =thisType;
-    
+
     printNodeContent(tmp);
-    
+
     free(tmp);
-    
+
     printf("\n");
 }
 
@@ -586,7 +592,7 @@ void printNodeContent(struct Node* pNode, bool pretty, int indentationNumber)
 {
     // local copy of number of indentations
     int thisIndentation = indentationNumber;
-    
+
     // switch based on type of pointer content
     switch (pNode->type) {
         case aInt:
@@ -604,9 +610,9 @@ void printNodeContent(struct Node* pNode, bool pretty, int indentationNumber)
         {
             // typecast void pointer back to Node
             struct Node* tmpNode = (Node*)pNode->ptr;
-            
+
             printf("[");
-            
+
             // start from the beginning until the next is NULL
             while(tmpNode != NULL)
             {
@@ -615,10 +621,10 @@ void printNodeContent(struct Node* pNode, bool pretty, int indentationNumber)
                     // typecast void pointer back to integer
                     printf("%d", *(int*)tmpNode->ptr);
                 }
-                
+
                 // change to next Node
                 tmpNode = tmpNode->next;
-                
+
                 // if there is a next item, put a commata
                 if (tmpNode != NULL)
                 {
@@ -639,7 +645,7 @@ void printNodeContent(struct Node* pNode, bool pretty, int indentationNumber)
         {
             // typecast void pointer back to Node
             struct Node* tmpNode = (Node*)pNode->ptr;
-            
+
             // increase indentation by one for recursive call
             thisIndentation++;
             printJson(&tmpNode, pretty, thisIndentation);
@@ -686,6 +692,21 @@ void printNodeContent(struct Node* pNode, bool pretty, int indentationNumber)
             // typecast void pointer back to float
             printf("%1.5f", *(float*)pNode->ptr);
             break;
+        }
+        case TYPE_BOOL:
+        {
+          // typecast void pointer back to bool
+          bool value = *(bool*)pNode->ptr;
+
+          if (value == false)
+          {
+            printf("false");
+          }
+          else
+          {
+            printf("true");
+          }
+          break;
         }
         default:
         {
